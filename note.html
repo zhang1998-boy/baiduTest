@@ -1,0 +1,132 @@
+<!--
+ * @Author: your name
+ * @Date: 2024-12-12 14:50:57
+ * @LastEditTime: 2024-12-12 14:59:31
+ * @LastEditors: ggboy
+ * @Description: 
+ * @FilePath: \baiduTest\baiduTest\note.html
+ * 
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>笔记管理应用</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- 搜索框 -->
+      <div class="search-bar">
+        <input type="text" id="search" placeholder="搜索笔记..." />
+      </div>
+
+      <!-- 笔记列表区域 -->
+      <div class="note-list">
+        <h2>笔记列表</h2>
+        <ul id="note-list"></ul>
+        <button id="add-note">添加笔记</button>
+      </div>
+
+      <!-- 笔记内容显示和编辑区域 -->
+      <div class="note-content">
+        <h2>笔记内容</h2>
+        <textarea id="note-text" placeholder="笔记内容..."></textarea>
+        <div class="buttons">
+          <button id="save-note">保存</button>
+          <button id="delete-note">删除</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 获取 DOM 元素
+      const noteList = document.getElementById('note-list')
+      const noteText = document.getElementById('note-text')
+      const saveNoteBtn = document.getElementById('save-note')
+      const deleteNoteBtn = document.getElementById('delete-note')
+      const addNoteBtn = document.getElementById('add-note')
+      const searchInput = document.getElementById('search')
+
+      // 从 localStorage 加载笔记
+      let notes = JSON.parse(localStorage.getItem('notes')) || []
+
+      // 渲染笔记列表
+      function renderNotes() {
+        noteList.innerHTML = ''
+        notes.forEach((note, index) => {
+          const li = document.createElement('li')
+          li.textContent = note.title || `笔记 ${index + 1}`
+          li.dataset.index = index
+          li.addEventListener('click', () => showNote(index))
+          noteList.appendChild(li)
+        })
+      }
+
+      // 显示笔记内容
+      function showNote(index) {
+        const note = notes[index]
+        noteText.value = note.content || ''
+        noteText.dataset.index = index
+      }
+
+      // 保存笔记
+      function saveNote() {
+        const index = noteText.dataset.index
+        if (index !== undefined) {
+          notes[index].content = noteText.value
+        } else {
+          notes.push({ content: noteText.value })
+        }
+        localStorage.setItem('notes', JSON.stringify(notes))
+        renderNotes()
+        noteText.value = ''
+        noteText.dataset.index = ''
+      }
+
+      // 删除笔记
+      function deleteNote() {
+        const index = noteText.dataset.index
+        if (index !== undefined) {
+          notes.splice(index, 1)
+          localStorage.setItem('notes', JSON.stringify(notes))
+          renderNotes()
+          noteText.value = ''
+          noteText.dataset.index = ''
+        }
+      }
+
+      // 添加新笔记
+      function addNote() {
+        noteText.value = ''
+        noteText.dataset.index = ''
+      }
+
+      // 搜索笔记
+      function searchNotes() {
+        const query = searchInput.value.toLowerCase()
+        const filteredNotes = notes.filter((note) =>
+          note.content.toLowerCase().includes(query)
+        )
+        noteList.innerHTML = ''
+        filteredNotes.forEach((note, index) => {
+          const li = document.createElement('li')
+          li.textContent = note.title || `笔记 ${index + 1}`
+          li.dataset.index = notes.indexOf(note)
+          li.addEventListener('click', () => showNote(notes.indexOf(note)))
+          noteList.appendChild(li)
+        })
+      }
+
+      // 绑定事件
+      saveNoteBtn.addEventListener('click', saveNote)
+      deleteNoteBtn.addEventListener('click', deleteNote)
+      addNoteBtn.addEventListener('click', addNote)
+      searchInput.addEventListener('input', searchNotes)
+
+      // 初始化渲染
+      renderNotes()
+    </script>
+  </body>
+</html>
